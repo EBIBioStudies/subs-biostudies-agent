@@ -84,11 +84,8 @@ public class BioStudiesClient {
             throw e;
         }
 
-        if (!OK_STATUS.equals(loginResponse.getStatus())){
-            throw new IllegalStateException("login failed: "+loginResponse);
-        }
         if (loginResponse.getSessid() == null){
-            throw new IllegalStateException("login did not produce session id: "+loginResponse);
+            throw new IllegalStateException("Session id not found: " + loginResponse);
         }
 
         return BioStudiesSession.of(loginResponse, config, restTemplate);

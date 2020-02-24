@@ -25,7 +25,8 @@ import static uk.ac.ebi.subs.biostudies.converters.ConverterUtils.addBioStudiesA
 @Component
 @Data
 public class UsiProjectToBsSubmission implements Converter<Project,BioStudiesSubmission> {
-
+    private static final String PROJECT_ATTR = "Project";
+    private static final String ATTACH_TO_ATTR = "AttachTo";
     private static final String SECTION_INTERNAL_ACCESSION = "PROJECT";
     private static final String SUBSECTION_INTERNAL_ACCESSION_PREFIX = "SECT";
 
@@ -39,20 +40,18 @@ public class UsiProjectToBsSubmission implements Converter<Project,BioStudiesSub
     public BioStudiesSubmission convert(Project source) {
         BioStudiesSubmission submission = new BioStudiesSubmission();
 
+        // TODO create the projects in dev and run the agent
         submission.getAttributes().addAll(convertAttributes(source));
-
         addBioStudiesAttributeIfNotNull(submission.getAttributes(), "Title", source.getTitle());
         addBioStudiesAttributeIfNotNull(submission.getAttributes(), "ReleaseDate", source.getReleaseDate().toString());
         addBioStudiesAttributeIfNotNull(submission.getAttributes(), "DataSource", "USI");
 
         submission.setType("submission");
-
         submission.setSection(usiProjectToBsSection.convert(source));
 
         int sectCounter = 0;
-
-        submission.setAccno("!{"+ bioStudiesConfig.getAccessionPrefix() +"}");
         submission.getSection().setAccno(SECTION_INTERNAL_ACCESSION);
+
         for (BioStudiesSubsection subsection : submission.getSection().getSubsections()) {
             if (!subsection.isAccessioned()) {
                 sectCounter++;
@@ -66,12 +65,11 @@ public class UsiProjectToBsSubmission implements Converter<Project,BioStudiesSub
     private List<BioStudiesAttribute> convertAttributes(Project project) {
         List<BioStudiesAttribute> bioStudiesAttributes = new ArrayList<>();
 
-
         for (Map.Entry<String, Collection<Attribute>> attributes : project.getAttributes().entrySet()) {
             for (Attribute attribute : attributes.getValue()) {
+                String attrName = attributes.getKey().equals(PROJECT_ATTR) ? ATTACH_TO_ATTR : attributes.getKey();
                 bioStudiesAttributes.add(
-                        BioStudiesAttribute.builder().name(attributes.getKey()).value(attribute.getValue()).build()
-                );
+                    BioStudiesAttribute.builder().name(attrName).value(attribute.getValue()).build());
             }
 
         }

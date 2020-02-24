@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.HttpStatusCodeException;
@@ -30,7 +31,6 @@ import java.util.stream.Collectors;
 @Data
 @RequiredArgsConstructor(staticName = "of")
 public class BioStudiesSession {
-
     private static final Logger logger = LoggerFactory.getLogger(BioStudiesSession.class);
 
     @NonNull
@@ -40,8 +40,10 @@ public class BioStudiesSession {
     @NonNull
     private final RestTemplate restTemplate;
 
-    private static final String SESSION_PARAM_NAME = "BIOSTDSESS";
+    private static final String SESSION_PARAM_NAME = "X-Session-Token";
 
+    // TODO update the client to run with new submitter
+    // TODO run a local instance and point there
     public SubmissionReport store(DataOwner dataOwner, BioStudiesSubmission bioStudiesSubmission) {
         BioStudiesSubmissionWrapper wrapper = new BioStudiesSubmissionWrapper();
         wrapper.getSubmissions().add(bioStudiesSubmission);
@@ -50,8 +52,12 @@ public class BioStudiesSession {
 
         HttpEntity<SubmissionReport> response;
         try {
+            URI url = commandUri(dataOwner);
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(SESSION_PARAM_NAME, bioStudiesLoginResponse.getSessid());
+            HttpEntity<BioStudiesSubmissionWrapper> request = new HttpEntity<>(wrapper, headers);
             response = restTemplate.postForEntity(
-                    this.commandUri(dataOwner, false),
+                    url,
                     wrapper,
                     SubmissionReport.class
             );
@@ -115,25 +121,17 @@ public class BioStudiesSession {
         }
     }
 
-    private URI commandUri(DataOwner dataOwner, boolean validateOnly) {
+    private URI commandUri(DataOwner dataOwner) {
         Map<String, String> parameters = new LinkedHashMap<>();
-
-        parameters.put(SESSION_PARAM_NAME, bioStudiesLoginResponse.getSessid());
         parameters.put("sse", "true"); //enables super user actions
-
-        if (validateOnly) {
-            parameters.put("validateOnly", "true");
-        }
-
         parameters.put("onBehalf", dataOwner.getEmail());
         parameters.put("name", dataOwner.getName());
-        parameters.put("domain", dataOwner.getTeamName());
 
         List<String> params = parameters.entrySet().stream()
                 .map(entry -> entry.getKey() + "=" + UriUtils.encodeQueryParam(entry.getValue(), "UTF-8"))
                 .collect(Collectors.toList());
 
         String queryString = "?" + String.join("&", params);
-        return URI.create(bioStudiesConfig.getServer() + "/submit/createupdate" + queryString);
+        return URI.create(bioStudiesConfig.getServer() + "/submissions" + queryString);
     }
 }

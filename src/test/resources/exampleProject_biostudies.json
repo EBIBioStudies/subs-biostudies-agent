@@ -1,5 +1,4 @@
 {
-  "accno": "!{S-SUBS}",
   "attributes": [
     {
       "name": "Project Core - Project Short Name",
@@ -8,6 +7,10 @@
     {
       "name": "HCA Project UUID",
       "value": "d96c2451-6e22-441f-a3e6-70fd0878bb1b"
+    },
+    {
+      "name": "AttachTo",
+      "value": "HCA"
     },
     {
       "name": "Title",

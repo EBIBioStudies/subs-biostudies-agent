@@ -59,7 +59,7 @@ public class BioStudiesSessionTest {
 
         assertEquals("OK", response.getStatus());
         assertNotNull(response.findAccession());
-        assertTrue(response.findAccession().startsWith(bioStudiesConfig.getAccessionPrefix()));
+        assertTrue(response.findAccession().startsWith("S-SUBS"));
 
         System.out.println(response.findAccession());
     }
