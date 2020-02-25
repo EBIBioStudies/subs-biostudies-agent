@@ -29,7 +29,6 @@ import uk.ac.ebi.subs.processing.ProcessingCertificate;
 @Service
 @RequiredArgsConstructor
 public class ProjectsProcessor {
-
     @NonNull private final BioStudiesClient bioStudiesClient;
     @NonNull private UsiProjectToBsSubmission converter;
 
@@ -66,11 +65,9 @@ public class ProjectsProcessor {
             bioStudiesSubmission.setAccno(project.getAccession());
         }
 
-        SubmissionReport report = bioStudiesSession.store(dataOwner, bioStudiesSubmission);
-
-        ProcessingCertificate cert = getProcessingCertificate(project, report);
-
-        String accession = report.findAccession();
+        BioStudiesSubmission submission = bioStudiesSession.store(dataOwner, bioStudiesSubmission);
+        ProcessingCertificate cert = getProcessingCertificate(project);
+        String accession = submission.getAccno();
 
         if (accession != null){
             cert.setAccession(accession);
@@ -79,18 +76,18 @@ public class ProjectsProcessor {
         return cert;
     }
 
-    private ProcessingCertificate getProcessingCertificate(Project project, SubmissionReport report) {
-        ProcessingCertificate cert;
-
-        if (!report.getStatus().equals("OK")){
-            cert = createProcessingCertificate(project, ProcessingStatusEnum.Error);
-            cert.setMessage(
-                    String.join("; ",report.findMessages("ERROR")));
-        } else {
-            cert = createProcessingCertificate(project, ProcessingStatusEnum.Completed);
-        }
-
-        return cert;
+    private ProcessingCertificate getProcessingCertificate(Project project) {
+//        ProcessingCertificate cert;
+//
+//        if (!report.getStatus().equals("OK")){
+//            cert = createProcessingCertificate(project, ProcessingStatusEnum.Error);
+//            cert.setMessage(
+//                    String.join("; ",report.findMessages("ERROR")));
+//        } else {
+            return createProcessingCertificate(project, ProcessingStatusEnum.Completed);
+//        }
+//
+//        return cert;
     }
 
     public void processUpdate(String submissionId, List<String> samples) {

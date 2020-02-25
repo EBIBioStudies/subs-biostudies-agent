@@ -25,7 +25,6 @@ import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 public class BioStudiesProcessorTest {
-
     @Mock
     private BioStudiesClient bioStudiesClient;
     @Mock
@@ -34,6 +33,8 @@ public class BioStudiesProcessorTest {
     private UsiProjectToBsSubmission usiProjectToBsSubmission;
     @Mock
     private SubmissionReport submissionReport;
+    @Mock
+    private BioStudiesSubmission submission;
 
     private Project project;
     private DataOwner dataOwner;
@@ -63,7 +64,7 @@ public class BioStudiesProcessorTest {
 
         when(usiProjectToBsSubmission.convert(project)).thenReturn(bioStudiesSubmission);
         when(bioStudiesClient.getBioStudiesSession()).thenReturn(bioStudiesSession);
-        when(bioStudiesSession.store(dataOwner, bioStudiesSubmission)).thenReturn(submissionReport);
+        when(bioStudiesSession.store(dataOwner, bioStudiesSubmission)).thenReturn(submission);
         when(submissionReport.findAccession()).thenReturn(accession);
         when(submissionReport.getStatus()).thenReturn("OK");
 
@@ -88,7 +89,7 @@ public class BioStudiesProcessorTest {
 
         when(usiProjectToBsSubmission.convert(project)).thenReturn(bioStudiesSubmission);
         when(bioStudiesClient.getBioStudiesSession()).thenReturn(bioStudiesSession);
-        when(bioStudiesSession.store(dataOwner, bioStudiesSubmission)).thenReturn(submissionReport);
+        when(bioStudiesSession.store(dataOwner, bioStudiesSubmission)).thenReturn(submission);
         when(submissionReport.findAccession()).thenReturn(accession);
         when(submissionReport.getStatus()).thenReturn("OK");
 

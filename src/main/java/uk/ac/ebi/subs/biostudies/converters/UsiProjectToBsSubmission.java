@@ -40,7 +40,6 @@ public class UsiProjectToBsSubmission implements Converter<Project,BioStudiesSub
     public BioStudiesSubmission convert(Project source) {
         BioStudiesSubmission submission = new BioStudiesSubmission();
 
-        // TODO create the projects in dev and run the agent
         submission.getAttributes().addAll(convertAttributes(source));
         addBioStudiesAttributeIfNotNull(submission.getAttributes(), "Title", source.getTitle());
         addBioStudiesAttributeIfNotNull(submission.getAttributes(), "ReleaseDate", source.getReleaseDate().toString());

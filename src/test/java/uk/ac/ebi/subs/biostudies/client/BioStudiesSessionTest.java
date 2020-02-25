@@ -1,6 +1,5 @@
 package uk.ac.ebi.subs.biostudies.client;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -14,7 +13,6 @@ import uk.ac.ebi.subs.biostudies.model.BioStudiesSubmission;
 import uk.ac.ebi.subs.biostudies.model.DataOwner;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringRunner.class)
@@ -35,9 +33,6 @@ public class BioStudiesSessionTest {
 
     private DataOwner dataOwner;
 
-    @Autowired
-    private BioStudiesConfig bioStudiesConfig;
-
     @Before
     public void buildup() {
         session = client.getBioStudiesSession();
@@ -54,27 +49,21 @@ public class BioStudiesSessionTest {
     }
 
     @Test
-    public void createGood() throws JsonProcessingException {
-        SubmissionReport response = session.store(dataOwner,bioStudiesSubmission);
-
-        assertEquals("OK", response.getStatus());
-        assertNotNull(response.findAccession());
-        assertTrue(response.findAccession().startsWith("S-SUBS"));
-
-        System.out.println(response.findAccession());
+    public void createGood() {
+        BioStudiesSubmission response = session.store(dataOwner, bioStudiesSubmission);
+        assertTrue(response.getAccno().startsWith("S-DHCA"));
     }
 
+    // TODO fix the logic for this test
+    // TODO adjust the rest of the logic required by the new submitter refactor
+    // TODO use S-SUBS instead of S-DHCA in the tests
+    // TODO check and remove SubmissionReport class
     @Test
     public void updateGood() {
         String expectedAccNo = "SUBSPRJ6";
         bioStudiesSubmission.setAccno(expectedAccNo);
 
-        SubmissionReport response = session.store(dataOwner,bioStudiesSubmission);
-
-        assertEquals("OK", response.getStatus());
-        assertNotNull(response.findAccession());
-        assertEquals(expectedAccNo,response.findAccession());
-
-        System.out.println(response.findAccession());
+        BioStudiesSubmission response = session.store(dataOwner, bioStudiesSubmission);
+        assertEquals(response.getAccno(), expectedAccNo);
     }
 }

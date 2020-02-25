@@ -22,14 +22,11 @@ import uk.ac.ebi.subs.biostudies.model.BioStudiesSubmission;
 @Component
 @RequiredArgsConstructor
 public class BioStudiesClient {
-
     private static final Logger logger = LoggerFactory.getLogger(BioStudiesClient.class);
 
     @NonNull
     private final BioStudiesConfig config;
     private final RestTemplate restTemplate = new RestTemplate();
-
-    private static final String OK_STATUS = "OK";
 
     private BioStudiesSession cachedSession;
     private Long sessionExpiryTime;
@@ -88,10 +85,10 @@ public class BioStudiesClient {
             throw new IllegalStateException("Session id not found: " + loginResponse);
         }
 
-        return BioStudiesSession.of(loginResponse, config, restTemplate);
+        return BioStudiesSession.of(restTemplate, config, loginResponse);
     }
 
     private URI loginUri() {
-        return URI.create(config.getServer() + "/auth/signin");
+        return URI.create(config.getServer() + "/auth/login");
     }
 }

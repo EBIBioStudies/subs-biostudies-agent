@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import uk.ac.ebi.subs.biostudies.model.BioStudiesSubmission;
 
 /**
  * This class is processing the response of the BioStudies server, when the user sends the list of projects to store.
@@ -17,6 +18,23 @@ import java.util.stream.Stream;
 public class SubmissionReport {
     private LogNode log;
     private String status;
+    private BioStudiesSubmission submission;
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public BioStudiesSubmission getSubmission() {
+        return submission;
+    }
+
+    public void setSubmission(BioStudiesSubmission submission) {
+        this.submission = submission;
+    }
 
     private static final String SUBMISSION_ACCESSIONED_MESSAGE_PREFIX = "Submission generated accNo: ";
     private static final String SUBMISSION_ACCESSION_PROVIDED_MESSAGE_PREFIX = "Submission accession no: ";
