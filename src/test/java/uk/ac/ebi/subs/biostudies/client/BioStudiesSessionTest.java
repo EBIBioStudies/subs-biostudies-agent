@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.subs.biostudies.BioStudiesApiDependentTest;
 import uk.ac.ebi.subs.biostudies.TestUtil;
+import uk.ac.ebi.subs.biostudies.model.BioStudiesAttribute;
 import uk.ac.ebi.subs.biostudies.model.BioStudiesSubmission;
 import uk.ac.ebi.subs.biostudies.model.DataOwner;
 
@@ -23,47 +24,73 @@ import static org.junit.Assert.assertTrue;
 })
 @Category(BioStudiesApiDependentTest.class)
 public class BioStudiesSessionTest {
+    private static final String SUB_FILE = "exampleProject_biostudies.json";
 
-    @Autowired
-    private BioStudiesClient client;
-
+    @Autowired private BioStudiesClient client;
+    private DataOwner superUser;
     private BioStudiesSession session;
-
     private BioStudiesSubmission bioStudiesSubmission;
 
-    private DataOwner dataOwner;
-
     @Before
-    public void buildup() {
+    public void setUp() {
         session = client.getBioStudiesSession();
-
-        bioStudiesSubmission = (BioStudiesSubmission) TestUtil.loadObjectFromJson(
-                "exampleProject_biostudies.json", BioStudiesSubmission.class
-        );
-
-        dataOwner = DataOwner.builder()
-                .email("test@example.com")
-                .name("John Doe")
-                .teamName("subs.api-tester-team-1")
-                .build();
+        bioStudiesSubmission = (BioStudiesSubmission) TestUtil.loadObjectFromJson(SUB_FILE, BioStudiesSubmission.class);
+        superUser = DataOwner
+            .builder()
+            .email("admin_user@ebi.ac.uk")
+            .name("Admin User")
+            .build();
     }
 
     @Test
-    public void createGood() {
-        BioStudiesSubmission response = session.store(dataOwner, bioStudiesSubmission);
-        assertTrue(response.getAccno().startsWith("S-DHCA"));
+    public void createSubmission() {
+        DataOwner regularUser = DataOwner
+            .builder()
+            .email("test@example.com")
+            .name("John Doe")
+            .teamName("subs.api-tester-team-1")
+            .build();
+
+        BioStudiesSubmission response = session.store(regularUser, bioStudiesSubmission);
+
+        assertTrue(response.getAccno().startsWith("S-SUBS"));
     }
 
-    // TODO fix the logic for this test
     // TODO adjust the rest of the logic required by the new submitter refactor
-    // TODO use S-SUBS instead of S-DHCA in the tests
     // TODO check and remove SubmissionReport class
     @Test
-    public void updateGood() {
+    public void updateSubmission() {
         String expectedAccNo = "SUBSPRJ6";
         bioStudiesSubmission.setAccno(expectedAccNo);
 
-        BioStudiesSubmission response = session.store(dataOwner, bioStudiesSubmission);
-        assertEquals(response.getAccno(), expectedAccNo);
+        BioStudiesSubmission createResponse = session.store(superUser, bioStudiesSubmission);
+        assertEquals(createResponse.getAccno(), expectedAccNo);
+
+        String newTitle = "UPDATED Title";
+        getSubmissionTitle(bioStudiesSubmission).setValue(newTitle);
+
+        BioStudiesSubmission updateResponse = session.update(bioStudiesSubmission);
+        assertEquals(updateResponse.getAccno(), expectedAccNo);
+        assertEquals(getSubmissionTitle(updateResponse).getValue(), newTitle);
+    }
+
+    @Test
+    public void getSubmission() {
+        String expectedAccNo = "SUBSPRJ7";
+        bioStudiesSubmission.setAccno(expectedAccNo);
+
+        BioStudiesSubmission createResponse = session.store(superUser, bioStudiesSubmission);
+        assertEquals(createResponse.getAccno(), expectedAccNo);
+
+        BioStudiesSubmission requestedSubmission = session.getSubmission(expectedAccNo);
+        assertEquals(requestedSubmission.getAccno(), expectedAccNo);
+    }
+
+    private BioStudiesAttribute getSubmissionTitle(BioStudiesSubmission submission) {
+        return submission.getAttributes()
+            .stream()
+            .filter(attr -> attr.getName().equals("Title"))
+            .findFirst()
+            .orElse(null);
     }
 }

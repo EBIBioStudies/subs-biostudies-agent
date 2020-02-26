@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
@@ -21,7 +22,6 @@ import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriUtils;
 import uk.ac.ebi.subs.biostudies.model.BioStudiesSubmission;
-import uk.ac.ebi.subs.biostudies.model.BioStudiesSubmissionWrapper;
 import uk.ac.ebi.subs.biostudies.model.DataOwner;
 
 /**
@@ -30,7 +30,9 @@ import uk.ac.ebi.subs.biostudies.model.DataOwner;
 @Data
 @RequiredArgsConstructor(staticName = "of")
 public class BioStudiesSession {
-    private static final String SESSION_PARAM_NAME = "X-Session-Token";
+    private static final String SESSION_ID_HEADER = "X-Session-Token";
+    private static final String SUBMISSION_TYPE_HEADER = "Submission_Type";
+    private static final String SUBMISSION_TYPE_PARAM = "application/json";
     private static final Logger logger = LoggerFactory.getLogger(BioStudiesSession.class);
 
     @NonNull private final RestTemplate restTemplate;
@@ -44,14 +46,10 @@ public class BioStudiesSession {
         try {
             response = restTemplate.postForEntity(
                 getRequestUri(dataOwner),
-                createBioStudiesRequest(bioStudiesLoginResponse.getSessid(), bioStudiesSubmission),
+                createBioStudiesSubmitRequest(bioStudiesLoginResponse.getSessid(), bioStudiesSubmission),
                 BioStudiesSubmission.class);
         } catch (HttpServerErrorException | HttpClientErrorException httpError) {
             logHttpError(httpError, "Http server error during create/update");
-            throw httpError;
-        } catch (JsonProcessingException jsonError) {
-            HttpServerErrorException httpError = new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR);
-            logHttpError(httpError, "Error in submission serialization");
             throw httpError;
         }
 
@@ -60,22 +58,19 @@ public class BioStudiesSession {
         return response.getBody();
     }
 
-    public SubmissionReport update(BioStudiesSubmission submission) {
-        BioStudiesSubmissionWrapper wrapper = new BioStudiesSubmissionWrapper();
-        wrapper.getSubmissions().add(submission);
+    public BioStudiesSubmission update(BioStudiesSubmission submission) {
         return restTemplate.postForObject(
-                bioStudiesConfig.getServer() + "/submit/createupdate" + "?BIOSTDSESS=" + bioStudiesLoginResponse
-                        .getSessid(),
-                wrapper,
-                SubmissionReport.class
-        );
+            bioStudiesConfig.getServer() + "/submissions",
+            createBioStudiesSubmitRequest(bioStudiesLoginResponse.getSessid(), submission),
+            BioStudiesSubmission.class);
     }
 
     public BioStudiesSubmission getSubmission(String accNo) {
-        return restTemplate.getForObject(
-                bioStudiesConfig.getServer() + "/submission/" + accNo + "?BIOSTDSESS=" + bioStudiesLoginResponse
-                        .getSessid(),
-                BioStudiesSubmission.class);
+        return restTemplate.exchange(
+            bioStudiesConfig.getServer() + "/submissions/" + accNo + ".json",
+            HttpMethod.GET,
+            new HttpEntity(getSecuredHeaders(bioStudiesLoginResponse.getSessid())),
+            BioStudiesSubmission.class).getBody();
     }
 
     private URI getRequestUri(DataOwner dataOwner) {
@@ -93,15 +88,26 @@ public class BioStudiesSession {
         return URI.create(bioStudiesConfig.getServer() + "/submissions" + queryString);
     }
 
-    private HttpEntity<String> createBioStudiesRequest(String sessionId, BioStudiesSubmission submission)
-    throws JsonProcessingException {
-        HttpHeaders headers = new HttpHeaders();
+    private HttpEntity<String> createBioStudiesSubmitRequest(String sessionId, BioStudiesSubmission submission) {
         ObjectMapper objectMapper = new ObjectMapper();
+        HttpHeaders headers = getSecuredHeaders(sessionId);
 
-        headers.add(SESSION_PARAM_NAME, sessionId);
-        headers.add("Submission_Type", "application/json");
+        headers.add(SUBMISSION_TYPE_HEADER, SUBMISSION_TYPE_PARAM);
 
-        return new HttpEntity<>(objectMapper.writeValueAsString(submission), headers);
+        try {
+            return new HttpEntity<>(objectMapper.writeValueAsString(submission), headers);
+        } catch (JsonProcessingException jsonError) {
+            HttpServerErrorException httpError = new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR);
+            logHttpError(httpError, "Error in submission serialization");
+            throw httpError;
+        }
+    }
+
+    private HttpHeaders getSecuredHeaders(String sessionId) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(SESSION_ID_HEADER, sessionId);
+
+        return headers;
     }
 
     private void logHttpError(HttpStatusCodeException e, String httpErrorTitleMessage) {
