@@ -119,23 +119,26 @@ public class BioStudiesSession {
     private void logSubmissionResponse(HttpEntity<BioStudiesSubmission> response) {
         ObjectMapper om = new ObjectMapper();
         String submissionReport = null;
+
         try {
             submissionReport = om.writeValueAsString(response.getBody());
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
+        } catch (JsonProcessingException jsonException) {
+            jsonException.printStackTrace();
         }
+
         logger.info("submission response:");
         logger.info(submissionReport);
     }
 
     private void logSubmission(BioStudiesSubmission submission) {
         ObjectMapper om = new ObjectMapper();
+
         try {
             String jsonSubmission = om.writeValueAsString(submission);
             logger.info("Submission as json:");
             logger.info(jsonSubmission);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
+        } catch (JsonProcessingException jsonException) {
+            jsonException.printStackTrace();
         }
     }
 }

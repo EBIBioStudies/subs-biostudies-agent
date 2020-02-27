@@ -28,7 +28,6 @@ public class BioStudiesProcessorTest {
     @Mock private UsiProjectToBsSubmission usiProjectToBsSubmission;
     @Mock private BioStudiesSubmission submission;
 
-    // TODO fix
     private Project project;
     private DataOwner dataOwner;
 

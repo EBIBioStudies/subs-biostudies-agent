@@ -22,16 +22,15 @@ import uk.ac.ebi.subs.biostudies.model.BioStudiesSubmission;
 @Component
 @RequiredArgsConstructor
 public class BioStudiesClient {
+    private static final long FIVE_MINUTES_IN_MILLIS = 300000;
     private static final Logger logger = LoggerFactory.getLogger(BioStudiesClient.class);
 
     @NonNull
     private final BioStudiesConfig config;
     private final RestTemplate restTemplate = new RestTemplate();
 
-    private BioStudiesSession cachedSession;
     private Long sessionExpiryTime;
-
-    private static final long FIVE_MINUTES_IN_MILLIS = 300000;
+    private BioStudiesSession cachedSession;
 
     public BioStudiesSession getBioStudiesSession(){
         long currentTime = System.currentTimeMillis();
