@@ -53,17 +53,15 @@ public class ProjectsProcessor {
     }
 
     private ProcessingCertificate processProject(DataOwner dataOwner, Project project, BioStudiesSession bioStudiesSession) {
-
         BioStudiesSubmission bioStudiesSubmission = converter.convert(project);
 
         //TODO has this alias+team combo been used already
-
         if (project.isAccessioned()) {
             bioStudiesSubmission.setAccno(project.getAccession());
         }
 
         BioStudiesSubmission submission = bioStudiesSession.store(dataOwner, bioStudiesSubmission);
-        ProcessingCertificate cert = getProcessingCertificate(project);
+        ProcessingCertificate cert = createProcessingCertificate(project, ProcessingStatusEnum.Completed);
         String accession = submission.getAccno();
 
         if (accession != null){
@@ -71,20 +69,6 @@ public class ProjectsProcessor {
         }
 
         return cert;
-    }
-
-    private ProcessingCertificate getProcessingCertificate(Project project) {
-//        ProcessingCertificate cert;
-//
-//        if (!report.getStatus().equals("OK")){
-//            cert = createProcessingCertificate(project, ProcessingStatusEnum.Error);
-//            cert.setMessage(
-//                    String.join("; ",report.findMessages("ERROR")));
-//        } else {
-            return createProcessingCertificate(project, ProcessingStatusEnum.Completed);
-//        }
-//
-//        return cert;
     }
 
     public void processUpdate(String submissionId, List<String> samples) {

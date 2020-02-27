@@ -1,6 +1,9 @@
 package uk.ac.ebi.subs.biostudies;
 
-import org.junit.Assert;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+import java.time.LocalDate;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -15,29 +18,25 @@ import uk.ac.ebi.subs.data.status.ProcessingStatusEnum;
 import uk.ac.ebi.subs.data.submittable.Project;
 import uk.ac.ebi.subs.processing.ProcessingCertificate;
 
-import java.time.LocalDate;
-
 @RunWith(SpringRunner.class)
 @Category(BioStudiesApiDependentTest.class)
 @SpringBootTest(classes={BioStudiesAgentApp.class})
 public class IntegrationTest {
-
-    @Autowired
-    ProjectsProcessor projectsProcessor;
-
     private Project project;
     private DataOwner dataOwner;
+    @Autowired private ProjectsProcessor projectsProcessor;
 
     @Before
     public void buildUp() {
         dataOwner = DataOwner.builder()
-                .email("test@example.com")
-                .name("John Doe")
-                .teamName("subs.testTeam")
-                .build();
+            .email("test@example.com")
+            .name("John Doe")
+            .teamName("subs.testTeam")
+            .build();
 
         project = new Project();
         project.setAlias("pr1");
+        project.setAccession("S-SUBST1");
         project.setTitle("a short title");
         project.setDescription("a short description");
         project.setTeam(Team.build(dataOwner.getTeamName()));
@@ -45,13 +44,11 @@ public class IntegrationTest {
     }
 
     @Test
-    public void expect_failure(){
-        ProcessingCertificate cert = projectsProcessor.processProjects(dataOwner,project);
+    public void processingErrorTest() {
+        ProcessingCertificate cert = projectsProcessor.processProjects(dataOwner, project);
 
-        Assert.assertNotNull(cert);
-        Assert.assertNotNull(cert.getMessage());
-        Assert.assertEquals(cert.getProcessingStatus(),ProcessingStatusEnum.Error);
+        assertNotNull(cert);
+        assertNotNull(cert.getMessage());
+        assertEquals(cert.getProcessingStatus(), ProcessingStatusEnum.Error);
     }
-
-
 }

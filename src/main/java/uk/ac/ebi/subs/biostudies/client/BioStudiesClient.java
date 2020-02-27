@@ -65,20 +65,18 @@ public class BioStudiesClient {
         BioStudiesLoginResponse loginResponse ;
 
         try {
-            loginResponse = restTemplate.postForObject(
-                    this.loginUri(),
-                    config.getAuth(),
-                    BioStudiesLoginResponse.class
-            );
+            loginResponse = restTemplate.postForObject(loginUri(), config.getAuth(), BioStudiesLoginResponse.class);
         }
-        catch (HttpClientErrorException e){
-            if (HttpStatus.FORBIDDEN.equals(e.getStatusCode())){
-                throw new IllegalArgumentException("login failed, check username and password");
+        catch (HttpClientErrorException httpError){
+            if (httpError.getStatusCode().equals(HttpStatus.UNAUTHORIZED)){
+                throw new IllegalArgumentException("Login failed, check username and password");
             }
+
             logger.error("Http error during login");
-            logger.error("Response code: {}",e.getRawStatusCode());
-            logger.error("Response body: {}",e.getResponseBodyAsString());
-            throw e;
+            logger.error("Response code: {}", httpError.getRawStatusCode());
+            logger.error("Response body: {}", httpError.getResponseBodyAsString());
+
+            throw httpError;
         }
 
         if (loginResponse.getSessid() == null){

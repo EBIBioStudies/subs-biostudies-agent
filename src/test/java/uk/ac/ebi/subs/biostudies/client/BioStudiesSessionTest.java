@@ -56,8 +56,6 @@ public class BioStudiesSessionTest {
         assertTrue(response.getAccno().startsWith("S-SUBS"));
     }
 
-    // TODO adjust the rest of the logic required by the new submitter refactor
-    // TODO check and remove SubmissionReport class
     @Test
     public void updateSubmission() {
         String expectedAccNo = "SUBSPRJ6";

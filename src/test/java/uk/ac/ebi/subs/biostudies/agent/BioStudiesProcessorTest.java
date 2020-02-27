@@ -1,7 +1,9 @@
 package uk.ac.ebi.subs.biostudies.agent;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.when;
+
 import java.time.LocalDate;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,8 +20,6 @@ import uk.ac.ebi.subs.data.component.Team;
 import uk.ac.ebi.subs.data.status.ProcessingStatusEnum;
 import uk.ac.ebi.subs.data.submittable.Project;
 import uk.ac.ebi.subs.processing.ProcessingCertificate;
-
-import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 public class BioStudiesProcessorTest {
@@ -55,6 +55,7 @@ public class BioStudiesProcessorTest {
 
         BioStudiesSubmission bioStudiesSubmission = new BioStudiesSubmission();
 
+        when(submission.getAccno()).thenReturn(accession);
         when(usiProjectToBsSubmission.convert(project)).thenReturn(bioStudiesSubmission);
         when(bioStudiesClient.getBioStudiesSession()).thenReturn(bioStudiesSession);
         when(bioStudiesSession.store(dataOwner, bioStudiesSubmission)).thenReturn(submission);
@@ -68,7 +69,7 @@ public class BioStudiesProcessorTest {
 
         ProcessingCertificate actualCert = projectsProcessor.processProjects(dataOwner,project);
 
-        Assert.assertEquals(expectedCert, actualCert);
+        assertEquals(expectedCert, actualCert);
     }
 
     @Test
@@ -78,6 +79,7 @@ public class BioStudiesProcessorTest {
 
         BioStudiesSubmission bioStudiesSubmission = new BioStudiesSubmission();
 
+        when(submission.getAccno()).thenReturn(accession);
         when(usiProjectToBsSubmission.convert(project)).thenReturn(bioStudiesSubmission);
         when(bioStudiesClient.getBioStudiesSession()).thenReturn(bioStudiesSession);
         when(bioStudiesSession.store(dataOwner, bioStudiesSubmission)).thenReturn(submission);
@@ -91,7 +93,7 @@ public class BioStudiesProcessorTest {
 
         ProcessingCertificate actualCert = projectsProcessor.processProjects(dataOwner, project);
 
-        Assert.assertEquals(expectedCert, actualCert);
+        assertEquals(expectedCert, actualCert);
     }
 
 }
