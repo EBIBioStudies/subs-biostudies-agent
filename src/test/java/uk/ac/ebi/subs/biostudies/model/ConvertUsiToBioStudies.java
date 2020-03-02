@@ -1,13 +1,16 @@
 package uk.ac.ebi.subs.biostudies.model;
 
-import org.junit.Before;
+import static org.junit.Assert.assertEquals;
+import static uk.ac.ebi.subs.biostudies.TestUtil.loadObjectFromJson;
+
+import java.util.List;
+import java.util.stream.Collectors;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.ac.ebi.subs.biostudies.TestUtil;
 import uk.ac.ebi.subs.biostudies.client.BioStudiesConfig;
 import uk.ac.ebi.subs.biostudies.converters.UsiContactsToBsSubSections;
 import uk.ac.ebi.subs.biostudies.converters.UsiFundingsToBsSubSections;
@@ -16,99 +19,79 @@ import uk.ac.ebi.subs.biostudies.converters.UsiProjectToBsSubmission;
 import uk.ac.ebi.subs.biostudies.converters.UsiPublicationsToBsSubsections;
 import uk.ac.ebi.subs.data.submittable.Project;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static org.junit.Assert.assertEquals;
-
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {
-        BioStudiesConfig.class,
-        UsiProjectToBsSubmission.class,
-        UsiProjectToBsSection.class,
-        UsiPublicationsToBsSubsections.class,
-        UsiContactsToBsSubSections.class,
-        UsiFundingsToBsSubSections.class
+    BioStudiesConfig.class,
+    UsiProjectToBsSubmission.class,
+    UsiProjectToBsSection.class,
+    UsiPublicationsToBsSubsections.class,
+    UsiContactsToBsSubSections.class,
+    UsiFundingsToBsSubSections.class
 })
 @EnableAutoConfiguration
 public class ConvertUsiToBioStudies {
-
-    private Project usiProject;
-    private BioStudiesSubmission bioStudiesSubmission;
-    private BioStudiesSubmission actual;
-
     @Autowired
     private UsiProjectToBsSubmission usiProjectToBsSubmission;
 
-    @Before
-    public void buildUp() {
-        usiProject = (Project) TestUtil.loadObjectFromJson(
-                "exampleProject_usi.json",
-                Project.class
-        );
-        bioStudiesSubmission = (BioStudiesSubmission) TestUtil.loadObjectFromJson(
-                "exampleProject_biostudies.json",
-                BioStudiesSubmission.class
-        );
-        actual = usiProjectToBsSubmission.convert(usiProject);
+    @Test
+    public void testWithProject() {
+        Project dspProject = (Project) loadObjectFromJson("DSPProject.json", Project.class);
+        BioStudiesSubmission expected =
+            (BioStudiesSubmission) loadObjectFromJson("BioStudiesSubmission.json", BioStudiesSubmission.class);
+        BioStudiesSubmission actual = usiProjectToBsSubmission.convert(dspProject);
+
+        compareSubmissions(expected, actual);
     }
 
     @Test
-    public void testSubmissionTopLevel() {
-        assertEquals(bioStudiesSubmission.getAccno(), actual.getAccno());
-        assertEquals(bioStudiesSubmission.getAttributes(), actual.getAttributes());
-        assertEquals(bioStudiesSubmission.getType(), actual.getType());
+    public void testWithoutProject() {
+        Project hcaProject = (Project) loadObjectFromJson("HCAProject.json", Project.class);
+        BioStudiesSubmission expected =
+            (BioStudiesSubmission) loadObjectFromJson("BioStudiesHCASubmission.json", BioStudiesSubmission.class);
+        BioStudiesSubmission actual = usiProjectToBsSubmission.convert(hcaProject);
+
+        compareSubmissions(expected, actual);
     }
 
-    @Test
-    public void testSection() {
-        assertEquals(bioStudiesSubmission.getSection(), actual.getSection());
+    private void compareSubmissions(BioStudiesSubmission expected, BioStudiesSubmission actual) {
+        assertEquals(expected, actual);
+
+        compareRootSection(expected, actual);
+        compareSubsections(expected, actual);
+
+        compareSpecificSubsections("Author", expected, actual);
+        compareSpecificSubsections("Publication", expected, actual);
+        compareSpecificSubsections("Organisation", expected, actual);
     }
 
-    @Test
-    public void testSubsections() {
-        assertEquals(bioStudiesSubmission.getSection().getSubsections(), actual.getSection().getSubsections());
+    private void compareRootSection(BioStudiesSubmission expected, BioStudiesSubmission actual) {
+        assertEquals(expected.getAccno(), actual.getAccno());
+        assertEquals(expected.getAttributes(), actual.getAttributes());
+        assertEquals(expected.getType(), actual.getType());
+        assertEquals(expected.getSection(), actual.getSection());
     }
 
-    @Test
-    public void testPublications() {
-        testSpecifiedSubsections("Publication");
-    }
+    private void compareSubsections(BioStudiesSubmission expected, BioStudiesSubmission actual) {
+        assertEquals(expected.getSection().getSubsections(), actual.getSection().getSubsections());
 
-    @Test
-    public void testAuthors() {
-        testSpecifiedSubsections("Author");
-    }
-
-    @Test
-    public void testOrganisations() {
-        testSpecifiedSubsections("Organisation");
-    }
-
-    @Test
-    public void testEachSubsection() {
         List<BioStudiesSubsection> actualSubsections = actual.getSection().getSubsections();
-        List<BioStudiesSubsection> expectedSubsections = bioStudiesSubmission.getSection().getSubsections();
+        List<BioStudiesSubsection> expectedSubsections = expected.getSection().getSubsections();
 
-        for (int i = 0; i < actualSubsections.size(); i++) {
-            assertEquals(expectedSubsections.get(i), actualSubsections.get(i));
+        for (int idx = 0; idx < actualSubsections.size(); idx++) {
+            assertEquals(expectedSubsections.get(idx), actualSubsections.get(idx));
         }
     }
 
-    private void testSpecifiedSubsections(String type) {
-        assertEquals(
-                fetchSubsection(bioStudiesSubmission, type),
-                fetchSubsection(actual, type)
-        );
+    private void compareSpecificSubsections(String type, BioStudiesSubmission expected, BioStudiesSubmission actual) {
+        assertEquals(fetchSubsection(expected, type), fetchSubsection(actual, type));
     }
 
     private List<BioStudiesSubsection> fetchSubsection(BioStudiesSubmission submission, String type) {
-        return submission.getSection().getSubsections().stream().filter(subsection -> type.equals(subsection.getType())).collect(Collectors.toList());
+        return submission
+            .getSection()
+            .getSubsections()
+            .stream()
+            .filter(subsection -> type.equals(subsection.getType()))
+            .collect(Collectors.toList());
     }
-
-    @Test
-    public void testEntirety() {
-        assertEquals(bioStudiesSubmission, actual);
-    }
-
 }

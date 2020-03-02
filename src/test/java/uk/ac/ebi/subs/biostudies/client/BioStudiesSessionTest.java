@@ -18,13 +18,13 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {
-        BioStudiesConfig.class,
-        BioStudiesClient.class,
-        BioStudiesClientTestContextConfiguration.class
+    BioStudiesConfig.class,
+    BioStudiesClient.class,
+    BioStudiesClientTestContextConfiguration.class
 })
 @Category(BioStudiesApiDependentTest.class)
 public class BioStudiesSessionTest {
-    private static final String SUB_FILE = "exampleProject_biostudies.json";
+    private static final String SUB_FILE = "BioStudiesSubmission.json";
 
     @Autowired private BioStudiesClient client;
     private DataOwner superUser;

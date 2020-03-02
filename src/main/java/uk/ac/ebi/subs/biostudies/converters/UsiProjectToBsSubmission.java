@@ -24,6 +24,8 @@ import uk.ac.ebi.subs.data.submittable.Project;
 @Component
 @Data
 public class UsiProjectToBsSubmission implements Converter<Project,BioStudiesSubmission> {
+    public static final String DSP_PROJECT = "DSP";
+
     private static final String PROJECT_ATTR = "Project";
     private static final String ATTACH_TO_ATTR = "AttachTo";
     private static final String SECTION_INTERNAL_ACCESSION = "PROJECT";
@@ -61,15 +63,24 @@ public class UsiProjectToBsSubmission implements Converter<Project,BioStudiesSub
     }
 
     private List<BioStudiesAttribute> convertAttributes(Project project) {
+        boolean projectFound = false;
         List<BioStudiesAttribute> bioStudiesAttributes = new ArrayList<>();
 
         for (Map.Entry<String, Collection<Attribute>> attributes : project.getAttributes().entrySet()) {
             for (Attribute attribute : attributes.getValue()) {
-                String attrName = attributes.getKey().equals(PROJECT_ATTR) ? ATTACH_TO_ATTR : attributes.getKey();
-                bioStudiesAttributes.add(
-                    BioStudiesAttribute.builder().name(attrName).value(attribute.getValue()).build());
-            }
+                String name = attributes.getKey();
 
+                if (name.equals(PROJECT_ATTR)) {
+                    projectFound = true;
+                    name = ATTACH_TO_ATTR;
+                }
+
+                bioStudiesAttributes.add(BioStudiesAttribute.builder().name(name).value(attribute.getValue()).build());
+            }
+        }
+
+        if (!projectFound) {
+            bioStudiesAttributes.add(BioStudiesAttribute.builder().name(ATTACH_TO_ATTR).value(DSP_PROJECT).build());
         }
 
         return bioStudiesAttributes;

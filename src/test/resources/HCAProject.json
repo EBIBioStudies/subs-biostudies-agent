@@ -1,0 +1,77 @@
+{
+  "id": "b72af989-ec37-4952-a8c7-43cf993e46fg",
+  "team": {
+    "name": "super-project-consortium"
+  },
+  "title": "HCA Project",
+  "accession": null,
+  "description": "A HCA submission",
+  "releaseDate": "2017-05-04",
+  "attributes": {
+    "Project Core - Project Short Name": [
+      {
+        "value": "HPSI human cerebral organoids"
+      }
+    ],
+    "HCA Project UUID": [
+      {
+        "value": "d96c2451-6e22-441f-a3e6-70fd0878bb1b"
+      }
+    ],
+    "Project": [{
+      "value": "HCA"
+    }]
+  },
+  "publications": [
+    {
+      "pubmedId": "PMID:27034376"
+    },
+    {
+      "doi": "10.1016/j.molcel.2015.11.003"
+    }
+  ],
+  "contacts": [
+    {
+      "firstName": "Clark",
+      "middleInitials": "J",
+      "lastName": "Kent",
+      "email": "kent@dailyplanet.com",
+      "address": "The Daily Planet, Metropolis",
+      "affiliation": "The Daily Planet",
+      "phone": "(555) 555-5555",
+      "fax": null,
+      "roles": [
+        "submitter"
+      ]
+    },
+    {
+      "firstName": "Cal",
+      "lastName": "El",
+      "email": "cal-el@krypton.net",
+      "address": "Fortress of solitude, Arctic",
+      "affiliation": "Krypton",
+      "phone": null,
+      "fax": null,
+      "roles": [
+        "investigator"
+      ]
+    }
+  ],
+  "fundings": [
+    {
+      "grantId": "BB/P0000001/1",
+      "organization": "Biotechnology and Biological Sciences Research Council (BBSRC); California Institute of Regenerative Medicine (CIRM)",
+      "grantTitle": "Test Research Grant"
+    },
+    {
+      "grantId": "AB/C0000001/2",
+      "organization": "Uncle Daniel's Organization",
+      "grantTitle": "Test Research Grant only for Daniel"
+    },
+    {
+      "grantId": "IS/C0000001/2",
+      "organization": "The Great Isuru Company",
+      "grantTitle": "Test Research Grant for Master Isuru"
+    }
+  ]
+}

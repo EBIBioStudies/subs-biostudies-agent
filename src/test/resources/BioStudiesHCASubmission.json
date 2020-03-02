@@ -1,0 +1,213 @@
+{
+  "attributes": [
+    {
+      "name": "Project Core - Project Short Name",
+      "value": "HPSI human cerebral organoids"
+    },
+    {
+      "name": "HCA Project UUID",
+      "value": "d96c2451-6e22-441f-a3e6-70fd0878bb1b"
+    },
+    {
+      "name": "AttachTo",
+      "value": "HCA"
+    },
+    {
+      "name": "Title",
+      "value": "HCA Project"
+    },
+    {
+      "name": "ReleaseDate",
+      "value": "2017-05-04"
+    },
+    {
+      "name": "DataSource",
+      "value": "USI"
+    }
+  ],
+  "section": {
+    "accno": "PROJECT",
+    "subsections": [
+      {
+        "accno": "SECT1",
+        "attributes": [
+          {
+            "name": "Name",
+            "value": "Clark J Kent"
+          },
+          {
+            "name": "firstName",
+            "value": "Clark"
+          },
+          {
+            "name": "middleInitials",
+            "value": "J"
+          },
+          {
+            "name": "lastName",
+            "value": "Kent"
+          },
+          {
+            "name": "E-mail",
+            "value": "kent@dailyplanet.com"
+          },
+          {
+            "name": "address",
+            "value": "The Daily Planet, Metropolis"
+          },
+          {
+            "name": "phone",
+            "value": "(555) 555-5555"
+          },
+          {
+            "name": "role",
+            "value": "submitter"
+          },
+          {
+            "name": "Organisation",
+            "isReference": true,
+            "value": "o1"
+          }
+        ],
+        "type": "Author"
+      },
+      {
+        "accno": "SECT2",
+        "attributes": [
+          {
+            "name": "Name",
+            "value": "Cal El"
+          },
+          {
+            "name": "firstName",
+            "value": "Cal"
+          },
+          {
+            "name": "lastName",
+            "value": "El"
+          },
+          {
+            "name": "E-mail",
+            "value": "cal-el@krypton.net"
+          },
+          {
+            "name": "address",
+            "value": "Fortress of solitude, Arctic"
+          },
+          {
+            "name": "role",
+            "value": "investigator"
+          },
+          {
+            "name": "Organisation",
+            "isReference": true,
+            "value": "o2"
+          }
+        ],
+        "type": "Author"
+      },
+      {
+        "accno": "o1",
+        "attributes": [
+          {
+            "name": "Name",
+            "value": "The Daily Planet"
+          }
+        ],
+        "type": "Organisation"
+      },
+      {
+        "accno": "o2",
+        "attributes": [
+          {
+            "name": "Name",
+            "value": "Krypton"
+          }
+        ],
+        "type": "Organisation"
+      },
+      {
+        "accno": "27034376",
+        "attributes": [
+          {
+            "name": "pubmedId",
+            "value": "PMID:27034376"
+          }
+        ],
+        "type": "Publication"
+      },
+      {
+        "accno": "10.1016/j.molcel.2015.11.003",
+        "attributes": [
+          {
+            "name": "doi",
+            "value": "10.1016/j.molcel.2015.11.003"
+          }
+        ],
+        "type": "Publication"
+      },
+      {
+        "accno": "SECT3",
+        "attributes": [
+          {
+            "name": "grant_id",
+            "value": "BB/P0000001/1"
+          },
+          {
+            "name": "grant_title",
+            "value": "Test Research Grant"
+          },
+          {
+            "name": "Agency",
+            "value": "Biotechnology and Biological Sciences Research Council (BBSRC); California Institute of Regenerative Medicine (CIRM)"
+          }
+        ],
+        "type": "Funding"
+      },
+      {
+        "accno": "SECT4",
+        "attributes": [
+          {
+            "name": "grant_id",
+            "value": "AB/C0000001/2"
+          },
+          {
+            "name": "grant_title",
+            "value": "Test Research Grant only for Daniel"
+          },
+          {
+            "name": "Agency",
+            "value": "Uncle Daniel's Organization"
+          }
+        ],
+        "type": "Funding"
+      },
+      {
+        "accno": "SECT5",
+        "attributes": [
+          {
+            "name": "grant_id",
+            "value": "IS/C0000001/2"
+          },
+          {
+            "name": "grant_title",
+            "value": "Test Research Grant for Master Isuru"
+          },
+          {
+            "name": "Agency",
+            "value": "The Great Isuru Company"
+          }
+        ],
+        "type": "Funding"
+      }
+    ],
+    "attributes": [
+      {
+        "name": "Description",
+        "value": "A HCA submission"
+      }
+    ],
+    "type": "Study"
+  },
+  "type": "submission"
+}
