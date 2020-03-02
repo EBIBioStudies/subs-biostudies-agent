@@ -3,10 +3,6 @@ package uk.ac.ebi.subs.biostudies.client;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +16,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriUtils;
+import org.springframework.web.util.UriComponentsBuilder;
 import uk.ac.ebi.subs.biostudies.model.BioStudiesSubmission;
 import uk.ac.ebi.subs.biostudies.model.DataOwner;
 
@@ -38,6 +34,8 @@ public class BioStudiesSession {
     @NonNull private final RestTemplate restTemplate;
     @NonNull private final BioStudiesConfig bioStudiesConfig;
     @NonNull private final BioStudiesLoginResponse bioStudiesLoginResponse;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public BioStudiesSubmission store(DataOwner dataOwner, BioStudiesSubmission bioStudiesSubmission) {
         logSubmission(bioStudiesSubmission);
@@ -74,24 +72,17 @@ public class BioStudiesSession {
     }
 
     private URI getRequestUri(DataOwner dataOwner) {
-        Map<String, String> parameters = new LinkedHashMap<>();
-        parameters.put("sse", "true"); //enables super user actions
-        parameters.put("onBehalf", dataOwner.getEmail());
-        parameters.put("name", dataOwner.getName());
-
-        List<String> params = parameters.entrySet().stream()
-            .map(entry -> entry.getKey() + "=" + UriUtils.encodeQueryParam(entry.getValue(), "UTF-8"))
-            .collect(Collectors.toList());
-
-        String queryString = "?" + String.join("&", params);
-
-        return URI.create(bioStudiesConfig.getServer() + "/submissions" + queryString);
+        return UriComponentsBuilder
+                .fromHttpUrl(bioStudiesConfig.getServer() + "/submissions")
+                .queryParam("sse", "true")
+                .queryParam("onBehalf", dataOwner.getEmail())
+                .queryParam("name", dataOwner.getName())
+                .build()
+                .toUri();
     }
 
     private HttpEntity<String> createBioStudiesSubmitRequest(String sessionId, BioStudiesSubmission submission) {
-        ObjectMapper objectMapper = new ObjectMapper();
         HttpHeaders headers = getSecuredHeaders(sessionId);
-
         headers.add(SUBMISSION_TYPE_HEADER, SUBMISSION_TYPE_PARAM);
 
         try {
@@ -110,18 +101,17 @@ public class BioStudiesSession {
         return headers;
     }
 
-    private void logHttpError(HttpStatusCodeException e, String httpErrorTitleMessage) {
+    private void logHttpError(HttpStatusCodeException exception, String httpErrorTitleMessage) {
         logger.error(httpErrorTitleMessage);
-        logger.error("Response code: {}", e.getRawStatusCode());
-        logger.error("Response body: {}", e.getResponseBodyAsString());
+        logger.error("Response code: {}", exception.getRawStatusCode());
+        logger.error("Response body: {}", exception.getResponseBodyAsString());
     }
 
     private void logSubmissionResponse(HttpEntity<BioStudiesSubmission> response) {
-        ObjectMapper om = new ObjectMapper();
         String submissionReport = null;
 
         try {
-            submissionReport = om.writeValueAsString(response.getBody());
+            submissionReport = objectMapper.writeValueAsString(response.getBody());
         } catch (JsonProcessingException jsonException) {
             jsonException.printStackTrace();
         }
@@ -131,10 +121,8 @@ public class BioStudiesSession {
     }
 
     private void logSubmission(BioStudiesSubmission submission) {
-        ObjectMapper om = new ObjectMapper();
-
         try {
-            String jsonSubmission = om.writeValueAsString(submission);
+            String jsonSubmission = objectMapper.writeValueAsString(submission);
             logger.info("Submission as json:");
             logger.info(jsonSubmission);
         } catch (JsonProcessingException jsonException) {
