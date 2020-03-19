@@ -1,6 +1,9 @@
 package uk.ac.ebi.subs.biostudies.agent;
 
-import org.junit.Assert;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.when;
+
+import java.time.LocalDate;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -10,7 +13,6 @@ import org.mockito.Spy;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.subs.biostudies.client.BioStudiesClient;
 import uk.ac.ebi.subs.biostudies.client.BioStudiesSession;
-import uk.ac.ebi.subs.biostudies.client.SubmissionReport;
 import uk.ac.ebi.subs.biostudies.converters.UsiProjectToBsSubmission;
 import uk.ac.ebi.subs.biostudies.model.BioStudiesSubmission;
 import uk.ac.ebi.subs.biostudies.model.DataOwner;
@@ -19,21 +21,12 @@ import uk.ac.ebi.subs.data.status.ProcessingStatusEnum;
 import uk.ac.ebi.subs.data.submittable.Project;
 import uk.ac.ebi.subs.processing.ProcessingCertificate;
 
-import java.time.LocalDate;
-
-import static org.mockito.Mockito.when;
-
 @RunWith(SpringRunner.class)
 public class BioStudiesProcessorTest {
-
-    @Mock
-    private BioStudiesClient bioStudiesClient;
-    @Mock
-    private BioStudiesSession bioStudiesSession;
-    @Mock
-    private UsiProjectToBsSubmission usiProjectToBsSubmission;
-    @Mock
-    private SubmissionReport submissionReport;
+    @Mock private BioStudiesClient bioStudiesClient;
+    @Mock private BioStudiesSession bioStudiesSession;
+    @Mock private UsiProjectToBsSubmission usiProjectToBsSubmission;
+    @Mock private BioStudiesSubmission submission;
 
     private Project project;
     private DataOwner dataOwner;
@@ -61,11 +54,10 @@ public class BioStudiesProcessorTest {
 
         BioStudiesSubmission bioStudiesSubmission = new BioStudiesSubmission();
 
+        when(submission.getAccno()).thenReturn(accession);
         when(usiProjectToBsSubmission.convert(project)).thenReturn(bioStudiesSubmission);
         when(bioStudiesClient.getBioStudiesSession()).thenReturn(bioStudiesSession);
-        when(bioStudiesSession.store(dataOwner, bioStudiesSubmission)).thenReturn(submissionReport);
-        when(submissionReport.findAccession()).thenReturn(accession);
-        when(submissionReport.getStatus()).thenReturn("OK");
+        when(bioStudiesSession.store(dataOwner, bioStudiesSubmission)).thenReturn(submission);
 
         ProcessingCertificate expectedCert = new ProcessingCertificate(
             project,
@@ -76,7 +68,7 @@ public class BioStudiesProcessorTest {
 
         ProcessingCertificate actualCert = projectsProcessor.processProjects(dataOwner,project);
 
-        Assert.assertEquals(expectedCert, actualCert);
+        assertEquals(expectedCert, actualCert);
     }
 
     @Test
@@ -86,11 +78,10 @@ public class BioStudiesProcessorTest {
 
         BioStudiesSubmission bioStudiesSubmission = new BioStudiesSubmission();
 
+        when(submission.getAccno()).thenReturn(accession);
         when(usiProjectToBsSubmission.convert(project)).thenReturn(bioStudiesSubmission);
         when(bioStudiesClient.getBioStudiesSession()).thenReturn(bioStudiesSession);
-        when(bioStudiesSession.store(dataOwner, bioStudiesSubmission)).thenReturn(submissionReport);
-        when(submissionReport.findAccession()).thenReturn(accession);
-        when(submissionReport.getStatus()).thenReturn("OK");
+        when(bioStudiesSession.store(dataOwner, bioStudiesSubmission)).thenReturn(submission);
 
         ProcessingCertificate expectedCert = new ProcessingCertificate(
             project,
@@ -101,7 +92,7 @@ public class BioStudiesProcessorTest {
 
         ProcessingCertificate actualCert = projectsProcessor.processProjects(dataOwner, project);
 
-        Assert.assertEquals(expectedCert, actualCert);
+        assertEquals(expectedCert, actualCert);
     }
 
 }

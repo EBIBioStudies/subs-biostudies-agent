@@ -1,5 +1,4 @@
 {
-  "accno": "!{S-SUBS}",
   "attributes": [
     {
       "name": "Project Core - Project Short Name",
@@ -10,8 +9,12 @@
       "value": "d96c2451-6e22-441f-a3e6-70fd0878bb1b"
     },
     {
+      "name": "AttachTo",
+      "value": "HCA"
+    },
+    {
       "name": "Title",
-      "value": "SUPER project"
+      "value": "HCA Project"
     },
     {
       "name": "ReleaseDate",
@@ -201,7 +204,7 @@
     "attributes": [
       {
         "name": "Description",
-        "value": "The aim of the SUPER project is to identify all functional elements in the metahuman genome sequence through the generation of a diverse collection of high-throughput datasets and mapping these datasets onto the metahuman genome sequence. The SUPER Project involves close interactions between computational and experimental scientists to analyze the data and to evaluate different methods for annotating functional elements of the metahuman genome."
+        "value": "A HCA submission"
       }
     ],
     "type": "Study"
