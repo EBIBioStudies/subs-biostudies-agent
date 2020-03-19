@@ -1,5 +1,11 @@
 package uk.ac.ebi.subs.biostudies.converters;
 
+import static uk.ac.ebi.subs.biostudies.converters.ConverterUtils.addBioStudiesAttributeIfNotNull;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import lombok.Data;
 import lombok.NonNull;
 import org.springframework.core.convert.converter.Converter;
@@ -11,13 +17,6 @@ import uk.ac.ebi.subs.biostudies.model.BioStudiesSubsection;
 import uk.ac.ebi.subs.data.component.Attribute;
 import uk.ac.ebi.subs.data.submittable.Project;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
-import static uk.ac.ebi.subs.biostudies.converters.ConverterUtils.addBioStudiesAttributeIfNotNull;
-
 /**
  * This component responsible for converting USI {@link Project} entity
  * to BioStudies {@link BioStudiesSubmission} entity.
@@ -25,7 +24,10 @@ import static uk.ac.ebi.subs.biostudies.converters.ConverterUtils.addBioStudiesA
 @Component
 @Data
 public class UsiProjectToBsSubmission implements Converter<Project,BioStudiesSubmission> {
+    public static final String DSP_PROJECT = "DSP";
 
+    private static final String PROJECT_ATTR = "Project";
+    private static final String ATTACH_TO_ATTR = "AttachTo";
     private static final String SECTION_INTERNAL_ACCESSION = "PROJECT";
     private static final String SUBSECTION_INTERNAL_ACCESSION_PREFIX = "SECT";
 
@@ -40,19 +42,16 @@ public class UsiProjectToBsSubmission implements Converter<Project,BioStudiesSub
         BioStudiesSubmission submission = new BioStudiesSubmission();
 
         submission.getAttributes().addAll(convertAttributes(source));
-
         addBioStudiesAttributeIfNotNull(submission.getAttributes(), "Title", source.getTitle());
         addBioStudiesAttributeIfNotNull(submission.getAttributes(), "ReleaseDate", source.getReleaseDate().toString());
         addBioStudiesAttributeIfNotNull(submission.getAttributes(), "DataSource", "USI");
 
         submission.setType("submission");
-
         submission.setSection(usiProjectToBsSection.convert(source));
 
         int sectCounter = 0;
-
-        submission.setAccno("!{"+ bioStudiesConfig.getAccessionPrefix() +"}");
         submission.getSection().setAccno(SECTION_INTERNAL_ACCESSION);
+
         for (BioStudiesSubsection subsection : submission.getSection().getSubsections()) {
             if (!subsection.isAccessioned()) {
                 sectCounter++;
@@ -64,16 +63,24 @@ public class UsiProjectToBsSubmission implements Converter<Project,BioStudiesSub
     }
 
     private List<BioStudiesAttribute> convertAttributes(Project project) {
+        boolean projectFound = false;
         List<BioStudiesAttribute> bioStudiesAttributes = new ArrayList<>();
-
 
         for (Map.Entry<String, Collection<Attribute>> attributes : project.getAttributes().entrySet()) {
             for (Attribute attribute : attributes.getValue()) {
-                bioStudiesAttributes.add(
-                        BioStudiesAttribute.builder().name(attributes.getKey()).value(attribute.getValue()).build()
-                );
-            }
+                String name = attributes.getKey();
 
+                if (name.equals(PROJECT_ATTR)) {
+                    projectFound = true;
+                    name = ATTACH_TO_ATTR;
+                }
+
+                bioStudiesAttributes.add(BioStudiesAttribute.builder().name(name).value(attribute.getValue()).build());
+            }
+        }
+
+        if (!projectFound) {
+            bioStudiesAttributes.add(BioStudiesAttribute.builder().name(ATTACH_TO_ATTR).value(DSP_PROJECT).build());
         }
 
         return bioStudiesAttributes;

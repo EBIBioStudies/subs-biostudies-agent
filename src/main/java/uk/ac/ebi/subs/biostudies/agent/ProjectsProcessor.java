@@ -4,19 +4,16 @@ import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 
 import java.util.List;
-import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
 import uk.ac.ebi.subs.biostudies.client.BioStudiesClient;
 import uk.ac.ebi.subs.biostudies.client.BioStudiesSession;
-import uk.ac.ebi.subs.biostudies.client.SubmissionReport;
 import uk.ac.ebi.subs.biostudies.converters.UsiProjectToBsSubmission;
 import uk.ac.ebi.subs.biostudies.model.BioStudiesAttribute;
 import uk.ac.ebi.subs.biostudies.model.BioStudiesLink;
 import uk.ac.ebi.subs.biostudies.model.BioStudiesSubmission;
-import uk.ac.ebi.subs.biostudies.model.BioStudiesSubsection;
 import uk.ac.ebi.subs.biostudies.model.DataOwner;
 import uk.ac.ebi.subs.data.component.Archive;
 import uk.ac.ebi.subs.data.status.ProcessingStatusEnum;
@@ -29,7 +26,6 @@ import uk.ac.ebi.subs.processing.ProcessingCertificate;
 @Service
 @RequiredArgsConstructor
 public class ProjectsProcessor {
-
     @NonNull private final BioStudiesClient bioStudiesClient;
     @NonNull private UsiProjectToBsSubmission converter;
 
@@ -57,37 +53,19 @@ public class ProjectsProcessor {
     }
 
     private ProcessingCertificate processProject(DataOwner dataOwner, Project project, BioStudiesSession bioStudiesSession) {
-
         BioStudiesSubmission bioStudiesSubmission = converter.convert(project);
 
         //TODO has this alias+team combo been used already
-
         if (project.isAccessioned()) {
             bioStudiesSubmission.setAccno(project.getAccession());
         }
 
-        SubmissionReport report = bioStudiesSession.store(dataOwner, bioStudiesSubmission);
-
-        ProcessingCertificate cert = getProcessingCertificate(project, report);
-
-        String accession = report.findAccession();
+        BioStudiesSubmission submission = bioStudiesSession.store(dataOwner, bioStudiesSubmission);
+        ProcessingCertificate cert = createProcessingCertificate(project, ProcessingStatusEnum.Completed);
+        String accession = submission.getAccno();
 
         if (accession != null){
             cert.setAccession(accession);
-        }
-
-        return cert;
-    }
-
-    private ProcessingCertificate getProcessingCertificate(Project project, SubmissionReport report) {
-        ProcessingCertificate cert;
-
-        if (!report.getStatus().equals("OK")){
-            cert = createProcessingCertificate(project, ProcessingStatusEnum.Error);
-            cert.setMessage(
-                    String.join("; ",report.findMessages("ERROR")));
-        } else {
-            cert = createProcessingCertificate(project, ProcessingStatusEnum.Completed);
         }
 
         return cert;

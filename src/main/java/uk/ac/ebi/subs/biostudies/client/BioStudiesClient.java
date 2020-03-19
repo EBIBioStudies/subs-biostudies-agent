@@ -22,19 +22,15 @@ import uk.ac.ebi.subs.biostudies.model.BioStudiesSubmission;
 @Component
 @RequiredArgsConstructor
 public class BioStudiesClient {
-
+    private static final long FIVE_MINUTES_IN_MILLIS = 300000;
     private static final Logger logger = LoggerFactory.getLogger(BioStudiesClient.class);
 
     @NonNull
     private final BioStudiesConfig config;
     private final RestTemplate restTemplate = new RestTemplate();
 
-    private static final String OK_STATUS = "OK";
-
-    private BioStudiesSession cachedSession;
     private Long sessionExpiryTime;
-
-    private static final long FIVE_MINUTES_IN_MILLIS = 300000;
+    private BioStudiesSession cachedSession;
 
     public BioStudiesSession getBioStudiesSession(){
         long currentTime = System.currentTimeMillis();
@@ -68,33 +64,28 @@ public class BioStudiesClient {
         BioStudiesLoginResponse loginResponse ;
 
         try {
-            loginResponse = restTemplate.postForObject(
-                    this.loginUri(),
-                    config.getAuth(),
-                    BioStudiesLoginResponse.class
-            );
+            loginResponse = restTemplate.postForObject(loginUri(), config.getAuth(), BioStudiesLoginResponse.class);
         }
-        catch (HttpClientErrorException e){
-            if (HttpStatus.FORBIDDEN.equals(e.getStatusCode())){
-                throw new IllegalArgumentException("login failed, check username and password");
+        catch (HttpClientErrorException httpError){
+            if (httpError.getStatusCode().equals(HttpStatus.UNAUTHORIZED)){
+                throw new IllegalArgumentException("Login failed, check username and password");
             }
+
             logger.error("Http error during login");
-            logger.error("Response code: {}",e.getRawStatusCode());
-            logger.error("Response body: {}",e.getResponseBodyAsString());
-            throw e;
+            logger.error("Response code: {}", httpError.getRawStatusCode());
+            logger.error("Response body: {}", httpError.getResponseBodyAsString());
+
+            throw httpError;
         }
 
-        if (!OK_STATUS.equals(loginResponse.getStatus())){
-            throw new IllegalStateException("login failed: "+loginResponse);
-        }
         if (loginResponse.getSessid() == null){
-            throw new IllegalStateException("login did not produce session id: "+loginResponse);
+            throw new IllegalStateException("Session id not found: " + loginResponse);
         }
 
-        return BioStudiesSession.of(loginResponse, config, restTemplate);
+        return BioStudiesSession.of(restTemplate, config, loginResponse);
     }
 
     private URI loginUri() {
-        return URI.create(config.getServer() + "/auth/signin");
+        return URI.create(config.getServer() + "/auth/login");
     }
 }
