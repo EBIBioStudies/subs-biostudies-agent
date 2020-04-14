@@ -37,22 +37,23 @@ public class ProjectsProcessor {
             BioStudiesSession bioStudiesSession = bioStudiesClient.getBioStudiesSession();
             processingCertificate = processProject(dataOwner, project, bioStudiesSession);
         } catch (IllegalStateException ise) {
-            processingCertificate = createProcessingCertificate(project, ProcessingStatusEnum.Error);
-            processingCertificate.setMessage(String.format(PROJECT_PROCESSING_HAS_FAILED_MESSAGE, ise.getMessage()));
+            processingCertificate = getErrorProcessingCertificate(project, ise.getMessage());
         } catch (HttpStatusCodeException hsce) {
-            processingCertificate = createProcessingCertificate(project, ProcessingStatusEnum.Error);
-            processingCertificate.setMessage(
-                    String.format(PROJECT_PROCESSING_HAS_FAILED_MESSAGE, hsce.getStatusText()));
+            processingCertificate = getErrorProcessingCertificate(project, hsce.getStatusText());
         }
 
         return processingCertificate;
     }
 
-    private ProcessingCertificate createProcessingCertificate(Project project, ProcessingStatusEnum processingStatus) {
-        return new ProcessingCertificate(project, Archive.BioStudies, processingStatus);
+    void processUpdate(String submissionId, List<String> samples) {
+        BioStudiesSession session = bioStudiesClient.getBioStudiesSession();
+        BioStudiesSubmission submission = session.getSubmission(submissionId);
+        submission.getSection().setLinks(samples.stream().map(this::createLink).collect(toList()));
+        session.update(submission);
     }
 
-    private ProcessingCertificate processProject(DataOwner dataOwner, Project project, BioStudiesSession bioStudiesSession) {
+    private ProcessingCertificate processProject(
+        DataOwner dataOwner, Project project, BioStudiesSession bioStudiesSession) {
         BioStudiesSubmission bioStudiesSubmission = converter.convert(project);
 
         //TODO has this alias+team combo been used already
@@ -71,17 +72,22 @@ public class ProjectsProcessor {
         return cert;
     }
 
-    public void processUpdate(String submissionId, List<String> samples) {
-        BioStudiesSession session = bioStudiesClient.getBioStudiesSession();
-        BioStudiesSubmission submission = session.getSubmission(submissionId);
-        submission.getSection().setLinks(samples.stream().map(this::createLink).collect(toList()));
-        session.update(submission);
-    }
-
     private BioStudiesLink createLink(String sampleId){
         BioStudiesLink link = new BioStudiesLink();
         link.setAttributes(singletonList(BioStudiesAttribute.builder().name("Type").value("BioSample").build()));
         link.setUrl(sampleId);
         return link;
+    }
+
+    private ProcessingCertificate getErrorProcessingCertificate(Project project, String error) {
+        String errorMessage = error == null ? "No response from server" : error;
+        ProcessingCertificate processingCertificate = createProcessingCertificate(project, ProcessingStatusEnum.Error);
+        processingCertificate.setMessage(String.format(PROJECT_PROCESSING_HAS_FAILED_MESSAGE, errorMessage));
+
+        return processingCertificate;
+    }
+
+    private ProcessingCertificate createProcessingCertificate(Project project, ProcessingStatusEnum processingStatus) {
+        return new ProcessingCertificate(project, Archive.BioStudies, processingStatus);
     }
 }
