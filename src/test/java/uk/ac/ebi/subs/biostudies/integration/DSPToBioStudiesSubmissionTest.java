@@ -5,7 +5,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static uk.ac.ebi.subs.biostudies.TestUtil.loadObjectFromJson;
+import static uk.ac.ebi.subs.biostudies.util.TestUtil.loadObjectFromJson;
 
 import org.junit.Before;
 import org.junit.Test;

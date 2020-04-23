@@ -43,26 +43,23 @@ public class AgentListener {
     public void handleProjectSubmission(SubmissionEnvelope submissionEnvelope) {
         Submission submission = submissionEnvelope.getSubmission();
 
-
         logger.info("Received submission {}", submission.getId());
 
         DataOwner dataOwner = usiSubmissionToDataOwner.convert(submission);
         Project project = submissionEnvelope.getProject();
 
         List<ProcessingCertificate> certificatesCompleted =
-                Collections.singletonList(projectsProcessor.processProjects(dataOwner, project));
+            Collections.singletonList(projectsProcessor.processProjects(dataOwner, project));
 
-        ProcessingCertificateEnvelope certificateEnvelopeCompleted = new ProcessingCertificateEnvelope(
-                submission.getId(),
-                certificatesCompleted,
-                submissionEnvelope.getJWTToken()
-        );
-        logger.info("Processed submission {} producing {} certificates",
-                submission.getId(),
-                certificatesCompleted.size()
-        );
+        ProcessingCertificateEnvelope certificateEnvelopeCompleted =
+            new ProcessingCertificateEnvelope(
+                submission.getId(), certificatesCompleted, submissionEnvelope.getJWTToken());
 
-        rabbitMessagingTemplate.convertAndSend(Exchanges.SUBMISSIONS, Topics.EVENT_SUBMISSION_AGENT_RESULTS, certificateEnvelopeCompleted);
+        logger.info(
+            "Processed submission {} producing {} certificates", submission.getId(), certificatesCompleted.size());
+
+        rabbitMessagingTemplate.convertAndSend(
+            Exchanges.SUBMISSIONS, Topics.EVENT_SUBMISSION_AGENT_RESULTS, certificateEnvelopeCompleted);
     }
 
     @RabbitListener(queues = QueueConfig.USI_ARCHIVE_ACCESSIONIDS_PUBLISHED__QUEUE)

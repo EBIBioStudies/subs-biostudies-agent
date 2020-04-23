@@ -1,7 +1,7 @@
 package uk.ac.ebi.subs.biostudies.model;
 
 import static org.junit.Assert.assertEquals;
-import static uk.ac.ebi.subs.biostudies.TestUtil.loadObjectFromJson;
+import static uk.ac.ebi.subs.biostudies.util.TestUtil.loadObjectFromJson;
 
 import java.util.List;
 import java.util.stream.Collectors;
