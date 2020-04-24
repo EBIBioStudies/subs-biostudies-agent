@@ -1,0 +1,6 @@
+spring:
+  rabbitmq:
+    host: mac-subs-009.ebi.ac.uk
+    username: subscored
+    password: nikto
+    virtual-host: subs_dev

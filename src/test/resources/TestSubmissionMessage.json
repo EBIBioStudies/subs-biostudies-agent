@@ -14,9 +14,6 @@
     },
     "submissionDate": 1587552849749
   },
-  "supportingSamplesRequired": [],
-  "supportingSamples": [],
-  "uploadedFiles": [],
   "project": {
     "id": "70f0992d-9303-4633-9ede-a72e73b667a4",
     "accession": "S-SUBSTEST123",
@@ -28,67 +25,9 @@
         "centre name": "EMBL-EBI"
       }
     },
-    "title": "Project title must be at least 50 characters long, so here's a long title",
-    "description": "Description must also be at least 50 characters long, so that we get reasonable project descriptions",
+    "title": "BioStudies Agent iTest Submission",
+    "description": "A BioStudies iTest agent submission",
     "attributes": {},
-    "contacts": [
-      {
-        "orcid": "0000-0003-0247-9118",
-        "firstName": "David",
-        "middleInitials": "M",
-        "lastName": "Richardson",
-        "email": "test@test.com",
-        "roles": [
-          "submitter"
-        ],
-        "address": null,
-        "affiliation": "EMBL-EBI",
-        "phone": null,
-        "fax": null
-      }
-    ],
-    "publications": [
-      {
-        "pubmedId": "17485433",
-        "doi": "10.1093/bioinformatics/btm152",
-        "articleTitle": null,
-        "journalTitle": null,
-        "authors": null,
-        "journalIssn": null,
-        "issue": null,
-        "year": null,
-        "volume": null,
-        "pageInfo": null,
-        "status": null
-      }
-    ],
-    "fundings": [
-      {
-        "grantId": "AT/USI00001/1",
-        "organization": "Biotechnology and Biological Sciences Research Council (BBSRC); California Institute of Regenerative Medicine (CIRM)",
-        "grantTitle": "API Test - Test Research Grant"
-      },
-      {
-        "grantId": "AT/USI00001/2",
-        "organization": "Uncle Daniel's Organization",
-        "grantTitle": "API Test - Test Research Grant only for Daniel"
-      },
-      {
-        "grantId": "AT/USI00001/3",
-        "organization": "The Great Isuru Company",
-        "grantTitle": "API Test - Test Research Grant for Master Isuru"
-      }
-    ],
     "releaseDate": "2018-09-21"
-  },
-  "analyses": [],
-  "assays": [],
-  "assayData": [],
-  "egaDacs": [],
-  "egaDacPolicies": [],
-  "egaDatasets": [],
-  "samples": [],
-  "sampleGroups": [],
-  "studies": [],
-  "protocols": []
+  }
 }

@@ -2,8 +2,5 @@
   "alias" : "tp-1007",
   "title" : "Test Title",
   "description" : "Test description",
-  "contacts" : [ ],
-  "publications" : [ ],
-  "fundings" : [ ],
   "releaseDate" : "2030-12-31"
 }

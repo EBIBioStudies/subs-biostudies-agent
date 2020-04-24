@@ -1,10 +1,12 @@
 package uk.ac.ebi.subs.biostudies.integration;
 
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 
 import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
@@ -27,6 +29,8 @@ import uk.ac.ebi.subs.biostudies.converters.UsiProjectToBsSection;
 import uk.ac.ebi.subs.biostudies.converters.UsiProjectToBsSubmission;
 import uk.ac.ebi.subs.biostudies.converters.UsiPublicationsToBsSubsections;
 import uk.ac.ebi.subs.biostudies.converters.UsiSubmissionToDataOwner;
+import uk.ac.ebi.subs.biostudies.model.BioStudiesAttribute;
+import uk.ac.ebi.subs.biostudies.model.BioStudiesSection;
 import uk.ac.ebi.subs.biostudies.model.BioStudiesSubmission;
 import uk.ac.ebi.subs.biostudies.util.TestUtil;
 import uk.ac.ebi.subs.messaging.Queues;
@@ -48,7 +52,6 @@ import uk.ac.ebi.subs.messaging.Queues;
 })
 public class DSPQueueIntegrationTest {
     private BioStudiesSession session;
-    private BioStudiesSubmission submission;
 
     @Autowired
     RabbitMQProperties rabbitMQProperties;
@@ -63,30 +66,62 @@ public class DSPQueueIntegrationTest {
 
     @Test
     public void readFromAgentQueue()
-    throws Exception
-     {
+    throws Exception {
         publishTestMessage();
-        waitForSubmission();
+        BioStudiesSubmission submission = waitForSubmissionProcessing();
 
-        // TODO verify all properties
-        // TODO simplify test submission message
         assertNotNull("The submission wasn't found", submission);
-        assertEquals(submission.getAccno(), "S-SUBSTEST123");
-     }
-
-    private void waitForSubmission()
-    throws InterruptedException{
-        int waits = 0;
-
-        // TODO change to while to wait last
-        do {
-            waits++;
-            Thread.sleep(10000);
-            submission = session.getSubmission("S-SUBSTEST123");
-        } while (submission == null || waits < 5);
+        assertSubmission(submission);
+        assertRootSection(submission.getSection());
     }
 
-    private void publishTestMessage() {
+    private void assertSubmission(BioStudiesSubmission submission) {
+        assertEquals(submission.getAccno(), "S-SUBSTEST123");
+
+        assertThat(submission.getAttributes(), hasSize(4));
+        assertAttribute(submission.getAttributes().get(0), "AttachTo", "DSP");
+        assertAttribute(submission.getAttributes().get(1), "Title", "BioStudies Agent iTest Submission");
+        assertAttribute(submission.getAttributes().get(2), "DataSource", "USI");
+        assertAttribute(submission.getAttributes().get(3), "ReleaseDate", "2018-09-21");
+    }
+
+    private void assertRootSection(BioStudiesSection rootSection) {
+        assertEquals(rootSection.getType(), "Study");
+
+        assertThat(rootSection.getAttributes(), hasSize(2));
+        assertAttribute(rootSection.getAttributes().get(0), "Description", "A BioStudies iTest agent submission");
+        assertAttribute(rootSection.getAttributes().get(1), "alias", "alias-901047");
+
+        assertThat(rootSection.getLinks(), empty());
+        assertThat(rootSection.getSubsections(), empty());
+    }
+
+    private void assertAttribute(BioStudiesAttribute attribute, String expectedName, String expectedValue) {
+        assertEquals(attribute.getName(), expectedName);
+        assertEquals(attribute.getValue(), expectedValue);
+    }
+
+    private BioStudiesSubmission waitForSubmissionProcessing()
+    throws InterruptedException {
+        int waits = 0;
+        BioStudiesSubmission submission = null;
+
+        while (waits < 5) {
+            submission = session.getSubmission("S-SUBSTEST123");
+
+            if (submission == null) {
+                waits++;
+                Thread.sleep(10000);
+            } else {
+                break;
+            }
+        }
+
+        return submission;
+    }
+
+    private void publishTestMessage()
+    throws IOException, TimeoutException {
         String message = TestUtil.readFile("TestSubmissionMessage.json");
         ConnectionFactory connectionFactory = new ConnectionFactory();
         connectionFactory.setHost(rabbitMQProperties.getHost());
@@ -94,12 +129,7 @@ public class DSPQueueIntegrationTest {
         connectionFactory.setPassword(rabbitMQProperties.getPassword());
         connectionFactory.setVirtualHost(rabbitMQProperties.getVirtualHost());
 
-        try (Connection connection = connectionFactory.newConnection();
-             Channel channel = connection.createChannel()) {
-            channel.basicPublish("", Queues.BIOSTUDIES_AGENT, null, message.getBytes());
-        } catch (IOException | TimeoutException exception) {
-            throw new RuntimeException(exception);
-        }
+        Channel channel = connectionFactory.newConnection().createChannel();
+        channel.basicPublish("", Queues.BIOSTUDIES_AGENT, null, message.getBytes());
     }
 }
-
