@@ -39,7 +39,8 @@ public class ProjectsProcessor {
         } catch (IllegalStateException ise) {
             processingCertificate = getErrorProcessingCertificate(project, ise.getMessage());
         } catch (HttpStatusCodeException hsce) {
-            processingCertificate = getErrorProcessingCertificate(project, hsce.getStatusText());
+            String message = hsce.getStatusText() == null ? hsce.getResponseBodyAsString() : hsce.getStatusText();
+            processingCertificate = getErrorProcessingCertificate(project, message);
         }
 
         return processingCertificate;

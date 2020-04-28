@@ -1,0 +1,33 @@
+{
+  "submission": {
+    "id": "8209dbe9-100d-4352-b2e6-b825ba7f51da",
+    "submitter": {
+      "email": "admin_user@ebi.ac.uk",
+      "name": "BioStudies Test Account"
+    },
+    "team": {
+      "name": "subs.api-tester-team-1",
+      "description": "api tester account",
+      "profile": {
+        "centre name": "EMBL-EBI"
+      }
+    },
+    "submissionDate": 1587552849749
+  },
+  "project": {
+    "id": "70f0992d-9303-4633-9ede-a72e73b667a4",
+    "accession": "S-SUBSTEST123",
+    "alias": "alias-901047",
+    "team": {
+      "name": "subs.api-tester-team-1",
+      "description": "api tester account",
+      "profile": {
+        "centre name": "EMBL-EBI"
+      }
+    },
+    "title": "BioStudies Agent iTest Submission",
+    "description": "A BioStudies iTest agent submission",
+    "attributes": {},
+    "releaseDate": "2018-09-21"
+  }
+}

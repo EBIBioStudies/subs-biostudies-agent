@@ -38,7 +38,6 @@ public class BioStudiesSession {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public BioStudiesSubmission store(DataOwner dataOwner, BioStudiesSubmission bioStudiesSubmission) {
-        logSubmission(bioStudiesSubmission);
         HttpEntity<BioStudiesSubmission> response;
 
         try {
@@ -50,8 +49,6 @@ public class BioStudiesSession {
             logHttpError(httpError, "Http server error during create/update");
             throw httpError;
         }
-
-        logSubmissionResponse(response);
 
         return response.getBody();
     }
@@ -105,28 +102,5 @@ public class BioStudiesSession {
         logger.error(httpErrorTitleMessage);
         logger.error("Response code: {}", exception.getRawStatusCode());
         logger.error("Response body: {}", exception.getResponseBodyAsString());
-    }
-
-    private void logSubmissionResponse(HttpEntity<BioStudiesSubmission> response) {
-        String submissionReport = null;
-
-        try {
-            submissionReport = objectMapper.writeValueAsString(response.getBody());
-        } catch (JsonProcessingException jsonException) {
-            jsonException.printStackTrace();
-        }
-
-        logger.info("submission response:");
-        logger.info(submissionReport);
-    }
-
-    private void logSubmission(BioStudiesSubmission submission) {
-        try {
-            String jsonSubmission = objectMapper.writeValueAsString(submission);
-            logger.info("Submission as json:");
-            logger.info(jsonSubmission);
-        } catch (JsonProcessingException jsonException) {
-            jsonException.printStackTrace();
-        }
     }
 }
