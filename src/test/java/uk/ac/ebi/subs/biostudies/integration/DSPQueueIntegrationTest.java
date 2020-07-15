@@ -79,10 +79,10 @@ public class DSPQueueIntegrationTest {
         assertEquals(submission.getAccno(), "S-SUBSTEST123");
 
         assertThat(submission.getAttributes(), hasSize(4));
-        assertAttribute(submission.getAttributes().get(0), "AttachTo", "DSP");
+        assertAttribute(submission.getAttributes().get(0), "DataSource", "USI");
         assertAttribute(submission.getAttributes().get(1), "Title", "BioStudies Agent iTest Submission");
-        assertAttribute(submission.getAttributes().get(2), "DataSource", "USI");
-        assertAttribute(submission.getAttributes().get(3), "ReleaseDate", "2018-09-21");
+        assertAttribute(submission.getAttributes().get(2), "ReleaseDate", "2018-09-21");
+        assertAttribute(submission.getAttributes().get(3), "AttachTo", "DSP");
     }
 
     private void assertRootSection(BioStudiesSection rootSection) {
@@ -107,7 +107,11 @@ public class DSPQueueIntegrationTest {
         BioStudiesSubmission submission = null;
 
         while (waits < 5) {
-            submission = session.getSubmission("S-SUBSTEST123");
+            try {
+                submission = session.getSubmission("S-SUBSTEST123");
+            } catch (Exception e) {
+                submission = null;
+            }
 
             if (submission == null) {
                 waits++;

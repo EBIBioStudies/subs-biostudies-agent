@@ -1,5 +1,6 @@
 package uk.ac.ebi.subs.biostudies.integration;
 
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.startsWith;
@@ -77,10 +78,10 @@ public class DSPToBioStudiesSubmissionTest {
         assertThat(submission.getAccno(), startsWith("S-SUBS"));
 
         assertThat(submission.getAttributes(), hasSize(4));
-        assertAttribute(submission.getAttributes().get(0), "AttachTo", "DSP");
+        assertAttribute(submission.getAttributes().get(0), "DataSource", "USI");
         assertAttribute(submission.getAttributes().get(1), "Title", "Test Title");
-        assertAttribute(submission.getAttributes().get(2), "DataSource", "USI");
-        assertAttribute(submission.getAttributes().get(3), "ReleaseDate", "2030-12-31");
+        assertAttribute(submission.getAttributes().get(2), "ReleaseDate", "2030-12-31");
+        assertAttribute(submission.getAttributes().get(3), "AttachTo", "DSP");
     }
 
     private void assertRootSection(BioStudiesSection rootSection) {
